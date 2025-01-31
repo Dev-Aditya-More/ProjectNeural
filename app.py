@@ -1,17 +1,16 @@
 import streamlit as st
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
-
 from langchain_core.prompts import (
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
     AIMessagePromptTemplate,
     ChatPromptTemplate
 )
-# Custom CSS styling
+
+# Custom CSS styling for SPPU theme
 st.markdown("""
 <style>
-    /* Existing styles */
     .main {
         background-color: #1a1a1a;
         color: #ffffff;
@@ -22,71 +21,51 @@ st.markdown("""
     .stTextInput textarea {
         color: #ffffff !important;
     }
-    
-    /* Add these new styles for select box */
     .stSelectbox div[data-baseweb="select"] {
-        color: white !important;
         background-color: #3d3d3d !important;
     }
-    
-    .stSelectbox svg {
-        fill: white !important;
-    }
-    
-    .stSelectbox option {
+    .stMarkdown code {
         background-color: #2d2d2d !important;
-        color: white !important;
-    }
-    
-    /* For dropdown menu items */
-    div[role="listbox"] div {
-        background-color: #2d2d2d !important;
-        color: white !important;
+        color: #89cff0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
-st.title("🧠 DeepSeek Code Companion")
-st.caption("🚀 Your AI Pair Programmer with Debugging Superpowers")
 
-# Sidebar configuration
-with st.sidebar:
-    st.header("⚙️ Configuration")
-    selected_model = st.selectbox(
-        "Choose Model",
-        ["deepseek-r1:1.5b", "deepseek-r1:3b"],
-        index=0
-    )
-    st.divider()
-    st.markdown("### Model Capabilities")
-    st.markdown("""
-    - 🐍 Python Expert
-    - 🐞 Debugging Assistant
-    - 📝 Code Documentation
-    - 💡 Solution Design
-    """)
-    st.divider()
-    st.markdown("Built with [Ollama](https://ollama.ai/) | [LangChain](https://python.langchain.com/)")
+st.title("Elevate-AI")
+st.caption("Syllabus-Aligned AI Assistant for Computer Engineering Students")
 
 
-# initiate the chat engine
-
-llm_engine=ChatOllama(
+# Initialize Ollama chat engine
+llm_engine = ChatOllama(
     model=selected_model,
     base_url="http://localhost:11434",
-
     temperature=0.3
-
 )
 
-# System prompt configuration
+# System prompt configuration for SPPU focus
 system_prompt = SystemMessagePromptTemplate.from_template(
-    "You are an expert AI coding assistant. Provide concise, correct solutions "
-    "with strategic print statements for debugging. Always respond in English."
+    """You are an expert tutor for Savitribai Phule Pune University's 
+    Fundamentals of Data Structures course. Follow these guidelines:
+    
+    1. Prioritize content from SPPU syllabus documents
+    2. Use examples from official course material
+    3. Structure answers with:
+       - Clear algorithm steps
+       - Time complexity analysis
+       - Practical code examples
+    4. Format responses using Markdown with:
+       - Headers for main concepts
+       - Code blocks for implementations
+       - Bullet points for key points
+    """
 )
 
 # Session state management
 if "message_log" not in st.session_state:
-    st.session_state.message_log = [{"role": "ai", "content": "Hi! I'm DeepSeek. How can I help you code today? 💻"}]
+    st.session_state.message_log = [{
+        "role": "ai", 
+        "content": "Welcome SPPU Student! Ask me about:\n- Algorithms\n- Data Structures\n- Complexity Analysis\n- Syllabus Topics"
+    }]
 
 # Chat container
 chat_container = st.container()
@@ -97,11 +76,9 @@ with chat_container:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# Chat input and processing
-user_query = st.chat_input("Type your coding question here...")
-
+# Chat processing functions
 def generate_ai_response(prompt_chain):
-    processing_pipeline=prompt_chain | llm_engine | StrOutputParser()
+    processing_pipeline = prompt_chain | llm_engine | StrOutputParser()
     return processing_pipeline.invoke({})
 
 def build_prompt_chain():
@@ -113,12 +90,15 @@ def build_prompt_chain():
             prompt_sequence.append(AIMessagePromptTemplate.from_template(msg["content"]))
     return ChatPromptTemplate.from_messages(prompt_sequence)
 
+# Handle user input
+user_query = st.chat_input("Ask your SPPU Data Structures question...")
+
 if user_query:
     # Add user message to log
     st.session_state.message_log.append({"role": "user", "content": user_query})
     
     # Generate AI response
-    with st.spinner("🧠 Processing..."):
+    with st.spinner("Analyzing syllabus content..."):
         prompt_chain = build_prompt_chain()
         ai_response = generate_ai_response(prompt_chain)
     
